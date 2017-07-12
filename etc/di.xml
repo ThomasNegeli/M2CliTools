@@ -3,7 +3,8 @@
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="clean_unused_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedProductMedia</item>
+                <item name="clean_unused_product_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedProductMedia</item>
+                <item name="clean_unused_category_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedCategoryMedia</item>
             </argument>
         </arguments>
     </type>
