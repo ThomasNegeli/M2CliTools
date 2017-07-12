@@ -2,7 +2,7 @@
 
 Various CLI Tools for Magento 2
 
-##Available commands:
+## Available commands:
 ````
 php bin/magento tnegeli:cleanup-unused-media
 ````
