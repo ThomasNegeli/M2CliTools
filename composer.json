@@ -3,7 +3,7 @@
   "description": "",
   "type": "magento2-module",
   "license": [
-    "OSL-3.0"
+    "MIT"
   ],
   "support": {
     "issues": "https://github.com/ThomasNegeli/M2CliTools/issues"
