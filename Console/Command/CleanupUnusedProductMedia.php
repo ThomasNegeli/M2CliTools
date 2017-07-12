@@ -11,7 +11,12 @@ use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Filesystem;
 
 
-class CleanupUnusedMedia extends Command
+/**
+ * Class CleanupUnusedProductMedia
+ *
+ * Cleanup unused product media files
+ */
+class CleanupUnusedProductMedia extends Command
 {
 
     private $resource;
@@ -29,8 +34,8 @@ class CleanupUnusedMedia extends Command
 
     protected function configure ()
     {
-        $this->setName( 'tnegeli:cleanup-unused-media' )
-            ->setDescription( 'Cleans up unused media from the filesystem.' )
+        $this->setName( 'tnegeli:cleanup-unused-product-media' )
+            ->setDescription( 'Cleans up unused product media from the filesystem.' )
             ->addOption( 'dry-run' );
     }
 

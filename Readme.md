@@ -4,7 +4,7 @@ Various CLI Tools for Magento 2
 
 ## Available commands:
 ````
-php bin/magento tnegeli:cleanup-unused-media
+php bin/magento tnegeli:cleanup-unused-product-media
 ````
 Use this command to remove unused media from filesystem.
 
