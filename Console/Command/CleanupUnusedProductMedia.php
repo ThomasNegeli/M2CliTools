@@ -80,7 +80,9 @@ Add the --delete option to delete the files, instead of doing a backup";
         $directoryIterator = new \RecursiveDirectoryIterator( $imageDir, \FilesystemIterator::SKIP_DOTS );
         foreach (new \RecursiveIteratorIterator( $directoryIterator ) as $file) {
 
-            if (strpos( $file, "/cache" ) !== false ||
+            if (
+                strpos( $file, "/.DS_Store" ) !== false ||
+                strpos( $file, "/cache" ) !== false ||
                 strpos( $file, "/default" ) !== false ||
                 strpos( $file, "/placeholder" ) !== false ||
                 strpos( $file, "/watermark" ) !== false ||
