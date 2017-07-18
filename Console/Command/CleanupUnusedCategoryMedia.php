@@ -77,7 +77,7 @@ Add the --delete option to delete the files, instead of doing a backup";
         $mediaDirectory = $this->filesystem->getDirectoryRead( DirectoryList::MEDIA );
         $imageDir = rtrim( $mediaDirectory->getAbsolutePath(), "/" ) . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR . 'category';
         $backupDir = $imageDir . DIRECTORY_SEPARATOR . 'unused_files_backup';
-        $directoryIterator = new \RecursiveDirectoryIterator( $imageDir );
+        $directoryIterator = new \RecursiveDirectoryIterator( $imageDir, \FilesystemIterator::SKIP_DOTS );
         foreach (new \RecursiveIteratorIterator( $directoryIterator ) as $file) {
 
             if (strpos( $file, "/cache" ) !== false ||
@@ -120,7 +120,7 @@ Add the --delete option to delete the files, instead of doing a backup";
             ->setHeaders( $headers )
             ->setRows( $table )->render( $output );
         $output->writeln( "Found " . number_format( $filesize / 1024 / 1024, '2' ) . " MB unused images in " . $countFiles . " files" );
-        if (!$isDelete) {
+        if (!$isDelete && !$isDryRun) {
             $output->writeln( "Files were moved to the following backup location: " . $backupDir );
         }
     }
