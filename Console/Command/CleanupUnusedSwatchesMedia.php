@@ -36,9 +36,6 @@ class CleanupUnusedSwatchesMedia extends Command
         $this->filesystem = $filesystem;
         $this->resource = $resource;
         $this->swatchesMediaHelper = $mediaHelper;
-        $this->state = $state;
-
-        $state->setAreaCode( 'frontend' );
         parent::__construct();
     }
 
