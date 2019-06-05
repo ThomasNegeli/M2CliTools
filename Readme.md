@@ -34,3 +34,9 @@ php bin/magento tnegeli:cleanup-illegal-product-media
 Use this command to identify and remove illegal entries in the media gallery database table, which might break catalog:images:resize process.
 
 You can use the --dry-run option to just test the result and give you a list of value_id entries from the media gallery table which are illegal.
+```
+php bin/magento tnegeli:cleanup-illegal-product-media-non-existing-files
+```
+Use this command to identify and remove illegal entries in the media gallery database table that have no files on the filesystem, which might break catalog:images:resize process.
+
+You can use the --dry-run option to just test the result and give you a list of value_id entries from the media gallery table which are illegal.
