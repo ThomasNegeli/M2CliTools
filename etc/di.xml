@@ -8,6 +8,7 @@
                 <item name="clean_unused_swatches_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedSwatchesMedia</item>
                 <item name="clean_illegal_product_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductMedia</item>
                 <item name="clean_illegal_product_media_non_existing_files" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductMediaNonExistingFiles</item>
+                <item name="clean_illegal_product_image_markers_non_existing_files" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductImageMarkersNonExistingFiles</item>
             </argument>
         </arguments>
     </type>
