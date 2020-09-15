@@ -3,6 +3,7 @@
 namespace Tnegeli\M2CliTools\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -117,9 +118,10 @@ Add the --delete option to delete the files, instead of doing a backup";
 
         $headers = array();
         $headers[] = 'filepath';
-        $this->getHelper( 'table' )
-            ->setHeaders( $headers )
-            ->setRows( $table )->render( $output );
+        $symTable = new Table($output);
+        $symTable->setHeaders( $headers );
+        $symTable->setRows( $table );
+        $symTable->render();
         $output->writeln( "Found " . number_format( $filesize / 1024 / 1024, '2' ) . " MB unused images in " . $countFiles . " files" );
         if (!$isDelete && !$isDryRun) {
             $output->writeln( "Files were moved to the following backup location: " . $backupDir );
