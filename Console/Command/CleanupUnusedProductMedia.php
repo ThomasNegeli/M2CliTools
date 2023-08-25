@@ -24,8 +24,7 @@ class CleanupUnusedProductMedia extends Command
 
     public function __construct(
         Filesystem $filesystem,
-        ResourceConnection $resource,
-        \Magento\Framework\Setup\ModuleDataSetupInterface $moduleDataSetup
+        ResourceConnection $resource
     ) {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
