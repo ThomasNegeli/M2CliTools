@@ -2,6 +2,7 @@
 
 namespace Tnegeli\M2CliTools\Console\Command;
 
+use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -61,7 +62,7 @@ Add the --delete option to delete the files, instead of doing a backup";
             $question = new ConfirmationQuestion( 'Are you sure you want to continue? [No] ', false );
             $this->questionHelper = $this->getHelper( 'question' );
             if (!$this->questionHelper->ask( $input, $output, $question )) {
-                return;
+                return Cli::RETURN_SUCCESS;
             }
         }
 
@@ -71,7 +72,7 @@ Add the --delete option to delete the files, instead of doing a backup";
             $question = new ConfirmationQuestion( 'Are you sure you want to continue? [No] ', false );
             $this->questionHelper = $this->getHelper( 'question' );
             if (!$this->questionHelper->ask( $input, $output, $question )) {
-                return;
+                return Cli::RETURN_SUCCESS;
             }
         }
 
@@ -168,6 +169,8 @@ Add the --delete option to delete the files, instead of doing a backup";
         if (!$isDelete && !$isDryRun) {
             $output->writeln( "Files were moved to the following backup location: " . $backupDir );
         }
+
+        return Cli::RETURN_SUCCESS;
     }
 
     private function backupFile ( $imageDir, $backupDir, $file )
