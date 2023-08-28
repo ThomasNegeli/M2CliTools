@@ -2,6 +2,7 @@
 
 namespace Tnegeli\M2CliTools\Console\Command;
 
+use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -59,7 +60,7 @@ Add the --dry-run option to just get the files that are unused.";
         $values = $this->getDbValues();
         if (count($values) == 0) {
             $output->writeln('You have no media gallery table entries.');
-            return;
+            return Cli::RETURN_SUCCESS;
         }
 
         $mediaDirectory = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA);
@@ -76,7 +77,7 @@ Add the --dry-run option to just get the files that are unused.";
         }
         if (count($mediaGalleryValuesToRemove) == 0) {
             $output->writeln("There are no media gallery entries without a file. All is fine.");
-            return;
+            return Cli::RETURN_SUCCESS;
         }
 
         if (!$isDryRun) {
@@ -89,6 +90,8 @@ Add the --dry-run option to just get the files that are unused.";
             $output->writeln("The following items are save to be removed: " . print_r($mediaGalleryValuesToRemove,
                     true));
         }
+
+        return Cli::RETURN_SUCCESS;
     }
 
     private function getSelect()

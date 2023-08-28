@@ -2,6 +2,7 @@
 
 namespace Tnegeli\M2CliTools\Console\Command;
 
+use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -52,14 +53,14 @@ Add the --dry-run option to just get the files that are unused.";
             $question = new ConfirmationQuestion('Are you sure you want to continue? [No] ', false);
             $this->questionHelper = $this->getHelper('question');
             if (!$this->questionHelper->ask($input, $output, $question)) {
-                return;
+                return Cli::RETURN_SUCCESS;
             }
         }
 
         $values = $this->getDbValues();
         if (count($values) == 0) {
             $output->writeln('There are no illegal values in media gallery table.');
-            return;
+            return Cli::RETURN_SUCCESS;
         }
         echo "The following entries in " . $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery') . " are illegal: " . print_r($values,
                 true) . PHP_EOL;
@@ -69,6 +70,8 @@ Add the --dry-run option to just get the files that are unused.";
             $coreWrite->query($this->getDelete());
             $output->writeln("Entries where removed from media gallery table. The command catalog:images:resize should work now.");
         }
+
+        return Cli::RETURN_SUCCESS;
     }
 
     private function getSelect()
