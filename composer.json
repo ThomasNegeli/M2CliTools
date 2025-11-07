@@ -2,7 +2,6 @@
   "name": "tnegeli/m2clitools",
   "description": "Some nice commands to cleanup media files and tables on production systems",
   "type": "magento2-module",
-  "version": "1.5.3",
   "license": [
     "MIT"
   ],
