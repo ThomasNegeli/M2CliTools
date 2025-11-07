@@ -2,8 +2,13 @@
 
 namespace Tnegeli\M2CliTools\Console\Command;
 
+use FilesystemIterator;
+use Magento\Framework\App\State;
 use Magento\Framework\Console\Cli;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -22,21 +27,22 @@ use Magento\Swatches\Model\Swatch as SwatchesModel;
 class CleanupUnusedSwatchesMedia extends Command
 {
 
-    private $resource;
-    private $filesystem;
-    private $swatchesMediaHelper;
-    private $state;
+    private ResourceConnection $resource;
+    private Filesystem $filesystem;
+    private SwatchesMediaHelper $swatchesMediaHelper;
+    private HelperInterface $questionHelper;
 
     public function __construct (
         Filesystem $filesystem,
         ResourceConnection $resource,
         SwatchesMediaHelper $mediaHelper,
-        \Magento\Framework\App\State $state
+        HelperInterface $questionHelper,
     )
     {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
         $this->swatchesMediaHelper = $mediaHelper;
+        $this->questionHelper = $questionHelper;
         parent::__construct();
     }
 
@@ -85,8 +91,8 @@ Add the --delete option to delete the files, instead of doing a backup";
         $mediaDirectory = $this->filesystem->getDirectoryRead( DirectoryList::MEDIA );
         $imageDir = rtrim( $mediaDirectory->getAbsolutePath(), "/" ) . DIRECTORY_SEPARATOR . SwatchesMediaHelper::SWATCH_MEDIA_PATH;
         $backupDir = $imageDir . DIRECTORY_SEPARATOR . 'unused_files_backup';
-        $directoryIterator = new \RecursiveDirectoryIterator( $imageDir, \FilesystemIterator::SKIP_DOTS );
-        foreach (new \RecursiveIteratorIterator( $directoryIterator ) as $file) {
+        $directoryIterator = new RecursiveDirectoryIterator( $imageDir, FilesystemIterator::SKIP_DOTS );
+        foreach (new RecursiveIteratorIterator( $directoryIterator ) as $file) {
             if (
                 strpos( $file, "/.DS_Store" ) !== false ||
                 strpos( $file, "/default" ) !== false ||
@@ -173,6 +179,14 @@ Add the --delete option to delete the files, instead of doing a backup";
         return Cli::RETURN_SUCCESS;
     }
 
+    private function getDbValues ()
+    {
+        $mediaGallery = $this->resource->getConnection()->getTableName( 'eav_attribute_option_swatch' );
+        $coreRead = $this->resource->getConnection( 'core_read' );
+        $values = $coreRead->fetchCol( 'SELECT value FROM ' . $mediaGallery . ' WHERE value IS NOT NULL AND value NOT LIKE "#%"' );
+        return $values;
+    }
+
     private function backupFile ( $imageDir, $backupDir, $file )
     {
         $newFile = str_replace( $imageDir, $backupDir, $file );
@@ -180,14 +194,6 @@ Add the --delete option to delete the files, instead of doing a backup";
             mkdir( dirname( $newFile ), 0777, true );
         }
         rename( $file, $newFile ) or die( 'Error on file backup from ' . $file . ' to ' . $newFile );
-    }
-
-    private function getDbValues ()
-    {
-        $mediaGallery = $this->resource->getConnection()->getTableName( 'eav_attribute_option_swatch' );
-        $coreRead = $this->resource->getConnection( 'core_read' );
-        $values = $coreRead->fetchCol( 'SELECT value FROM ' . $mediaGallery . ' WHERE value IS NOT NULL AND value NOT LIKE "#%"' );
-        return $values;
     }
 
 }

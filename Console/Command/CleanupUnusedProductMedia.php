@@ -2,11 +2,15 @@
 
 namespace Tnegeli\M2CliTools\Console\Command;
 
+use FilesystemIterator;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Console\Cli;
 use Magento\Framework\Filesystem;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,15 +23,18 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  */
 class CleanupUnusedProductMedia extends Command
 {
-    private $resource;
-    private $filesystem;
+    private ResourceConnection $resource;
+    private Filesystem $filesystem;
+    private HelperInterface $questionHelper;
 
     public function __construct(
         Filesystem $filesystem,
-        ResourceConnection $resource
+        ResourceConnection $resource,
+        HelperInterface $questionHelper,
     ) {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
+        $this->questionHelper = $questionHelper;
         parent::__construct();
     }
 
@@ -76,8 +83,8 @@ Add the --delete option to delete the files, instead of doing a backup";
         $mediaDirectory = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA);
         $imageDir = rtrim($mediaDirectory->getAbsolutePath(), "/") . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR . 'product';
         $backupDir = $imageDir . DIRECTORY_SEPARATOR . 'unused_files_backup';
-        $directoryIterator = new \RecursiveDirectoryIterator($imageDir, \FilesystemIterator::SKIP_DOTS);
-        foreach (new \RecursiveIteratorIterator($directoryIterator) as $file) {
+        $directoryIterator = new RecursiveDirectoryIterator($imageDir, FilesystemIterator::SKIP_DOTS);
+        foreach (new RecursiveIteratorIterator($directoryIterator) as $file) {
             if (
                 strpos($file, "/.DS_Store") !== false ||
                 strpos($file, "/cache") !== false ||

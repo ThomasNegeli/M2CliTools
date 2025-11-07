@@ -4,7 +4,10 @@ namespace Tnegeli\M2CliTools\Console\Command;
 
 use Magento\Catalog\Model\Indexer\Product\Flat\State;
 use Magento\Framework\Console\Cli;
+use Magento\Framework\Indexer\StateInterface;
+use Magento\Indexer\Model\IndexerFactory;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -21,22 +24,25 @@ use Magento\Framework\Filesystem;
 class CleanupIllegalProductImageMarkersNonExistingFiles extends Command
 {
 
-    private $resource;
-    private $filesystem;
-    private $mediaDirectory;
-    private $indexerFactory;
+    private ResourceConnection $resource;
+    private Filesystem $filesystem;
+    private Filesystem\Directory\ReadInterface $mediaDirectory;
+    private IndexerFactory $indexerFactory;
+    private HelperInterface $questionHelper;
 
 
     public function __construct(
-        \Magento\Indexer\Model\IndexerFactory $indexerFactory,
+        IndexerFactory $indexerFactory,
         Filesystem $filesystem,
-        ResourceConnection $resource
+        ResourceConnection $resource,
+        HelperInterface $questionHelper,
     )
     {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
         $this->indexerFactory = $indexerFactory;
         $this->mediaDirectory = $filesystem->getDirectoryRead(DirectoryList::MEDIA);
+        $this->questionHelper = $questionHelper;
         parent::__construct();
     }
 
@@ -115,29 +121,11 @@ Add the --dry-run option to just get the files that are unused.";
         return Cli::RETURN_SUCCESS;
     }
 
-    private function reindexRequiredIndex($output)
+    private function getDbValues()
     {
-        // catalog_product_flat is of interest to us
-        $indexerIds = array(State::INDEXER_ID);
-
-        foreach ($indexerIds as $indexerId) {
-            $indexer = $this->indexerFactory->create();
-            /* @var $indexer Indexer */
-            $indexer->load($indexerId);
-
-            if ($indexer->isScheduled()) {
-                // if we are in update by schedule mode, an index:reset is required
-                $indexer->getState()
-                    ->setStatus(\Magento\Framework\Indexer\StateInterface::STATUS_INVALID)
-                    ->save();
-                $output->writeln("The following index was marked as invalid: " . State::INDEXER_ID);
-            } else {
-                // if we are in realtime mode, we can reindex directly
-                $output->writeln("Start reindexing of: " . State::INDEXER_ID);
-                $indexer->reindexAll();
-                $output->writeln("The following index was rebuilt: " . State::INDEXER_ID);
-            }
-        }
+        $coreRead = $this->resource->getConnection('core_read');
+        $values = $coreRead->fetchAll($this->getSelect());
+        return $values;
     }
 
     private function getSelect()
@@ -174,11 +162,29 @@ Add the --dry-run option to just get the files that are unused.";
         return $delete;
     }
 
-    private function getDbValues()
+    private function reindexRequiredIndex($output)
     {
-        $coreRead = $this->resource->getConnection('core_read');
-        $values = $coreRead->fetchAll($this->getSelect());
-        return $values;
+        // catalog_product_flat is of interest to us
+        $indexerIds = array(State::INDEXER_ID);
+
+        foreach ($indexerIds as $indexerId) {
+            $indexer = $this->indexerFactory->create();
+            /* @var $indexer Indexer */
+            $indexer->load($indexerId);
+
+            if ($indexer->isScheduled()) {
+                // if we are in update by schedule mode, an index:reset is required
+                $indexer->getState()
+                    ->setStatus(StateInterface::STATUS_INVALID)
+                    ->save();
+                $output->writeln("The following index was marked as invalid: " . State::INDEXER_ID);
+            } else {
+                // if we are in realtime mode, we can reindex directly
+                $output->writeln("Start reindexing of: " . State::INDEXER_ID);
+                $indexer->reindexAll();
+                $output->writeln("The following index was rebuilt: " . State::INDEXER_ID);
+            }
+        }
     }
 
 }

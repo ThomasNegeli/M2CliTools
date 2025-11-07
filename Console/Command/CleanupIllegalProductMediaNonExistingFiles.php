@@ -4,6 +4,7 @@ namespace Tnegeli\M2CliTools\Console\Command;
 
 use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\HelperInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -20,15 +21,18 @@ use Magento\Framework\Filesystem;
 class CleanupIllegalProductMediaNonExistingFiles extends Command
 {
 
-    private $resource;
-    private $filesystem;
+    private ResourceConnection $resource;
+    private Filesystem $filesystem;
+    private HelperInterface $questionHelper;
 
     public function __construct(
         Filesystem $filesystem,
-        ResourceConnection $resource
+        ResourceConnection $resource,
+        HelperInterface $questionHelper,
     ) {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
+        $this->questionHelper = $questionHelper;
         parent::__construct();
     }
 
@@ -94,6 +98,14 @@ Add the --dry-run option to just get the files that are unused.";
         return Cli::RETURN_SUCCESS;
     }
 
+    private function getDbValues()
+    {
+        $coreRead = $this->resource->getConnection('core_read');
+        /* select value_id from catalog_product_entity_media_gallery where value_id not in (select value_id from catalog_product_entity_media_gallery_value_to_entity); */
+        $values = $coreRead->fetchAll($this->getSelect());
+        return $values;
+    }
+
     private function getSelect()
     {
         $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery');
@@ -123,14 +135,6 @@ Add the --dry-run option to just get the files that are unused.";
         $valueIds = implode(',', $valueIds);
         $delete = 'DELETE FROM ' . $mediaGalleryValueToEntity . ' WHERE value_id IN (' . $valueIds . ')';
         return $delete;
-    }
-
-    private function getDbValues()
-    {
-        $coreRead = $this->resource->getConnection('core_read');
-        /* select value_id from catalog_product_entity_media_gallery where value_id not in (select value_id from catalog_product_entity_media_gallery_value_to_entity); */
-        $values = $coreRead->fetchAll($this->getSelect());
-        return $values;
     }
 
 }
