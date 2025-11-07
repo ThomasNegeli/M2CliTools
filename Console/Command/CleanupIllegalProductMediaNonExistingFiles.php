@@ -4,7 +4,7 @@ namespace Tnegeli\M2CliTools\Console\Command;
 
 use Magento\Framework\Console\Cli;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\HelperInterface;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -23,12 +23,12 @@ class CleanupIllegalProductMediaNonExistingFiles extends Command
 
     private ResourceConnection $resource;
     private Filesystem $filesystem;
-    private HelperInterface $questionHelper;
+    private QuestionHelper $questionHelper;
 
     public function __construct(
         Filesystem $filesystem,
         ResourceConnection $resource,
-        HelperInterface $questionHelper,
+        QuestionHelper $questionHelper,
     ) {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
