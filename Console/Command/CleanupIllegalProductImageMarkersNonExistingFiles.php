@@ -3,17 +3,18 @@
 namespace Tnegeli\M2CliTools\Console\Command;
 
 use Magento\Catalog\Model\Indexer\Product\Flat\State;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Console\Cli;
+use Magento\Framework\Filesystem;
 use Magento\Framework\Indexer\StateInterface;
 use Magento\Indexer\Model\IndexerFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Filesystem;
 
 
 /**
@@ -32,10 +33,10 @@ class CleanupIllegalProductImageMarkersNonExistingFiles extends Command
 
 
     public function __construct(
-        IndexerFactory $indexerFactory,
-        Filesystem $filesystem,
+        IndexerFactory     $indexerFactory,
+        Filesystem         $filesystem,
         ResourceConnection $resource,
-        QuestionHelper $questionHelper,
+        QuestionHelper     $questionHelper,
     )
     {
         $this->filesystem = $filesystem;
@@ -46,12 +47,13 @@ class CleanupIllegalProductImageMarkersNonExistingFiles extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tnegeli:cleanup-illegal-product-image-markers-non-existing-files')
             ->setDescription('Cleanup illegal product image markers from database for which no files are available.')
             ->addOption('dry-run')
-            ->addOption('delete');
+            ->addOption('delete')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'Remove the entries even if no file at all exists.');
 
         $help = "Cleanup illegal product image markers from database for which no files are available.'
 Add the --dry-run option to just get the files that are unused.";
@@ -59,7 +61,7 @@ Add the --dry-run option to just get the files that are unused.";
         $this->setHelp($help);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $isDryRun = $input->getOption('dry-run');
         if (!$isDryRun) {
@@ -80,6 +82,10 @@ Add the --dry-run option to just get the files that are unused.";
         $mediaDirectory = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA);
         $imageDir = rtrim($mediaDirectory->getAbsolutePath(),
                 "/") . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR . 'product';
+        if (!is_dir($imageDir)) {
+            $output->writeln('<error>The media directory ' . $imageDir . ' does not exist. Aborting, otherwise all entries would be removed.</error>');
+            return Cli::RETURN_FAILURE;
+        }
 
         $imageMarkersToRemove = array();
         $imageMarkersToKeep = array();
@@ -87,9 +93,10 @@ Add the --dry-run option to just get the files that are unused.";
             $filename = $marker['value'];
             if (!$this->fileExists($imageDir . $filename)) {
                 $imageMarkersToRemove[$marker['value_id']] = $filename;
-                $output->writeln("The following image marker has no existing file: " . print_r($marker, true));
+                $output->writeln("No existing file for image marker value_id " . $marker['value_id'] . ": " . $filename);
             } else {
                 $imageMarkersToKeep[$marker['value_id']] = $filename;
+                $output->writeln("Keeping image marker value_id " . $marker['value_id'] . ": " . $filename, OutputInterface::VERBOSITY_VERBOSE);
             }
         }
 
@@ -98,8 +105,17 @@ Add the --dry-run option to just get the files that are unused.";
             return Cli::RETURN_SUCCESS;
         }
 
-        $output->writeln("The following items are left untouched: " . print_r($imageMarkersToKeep,
-                true));
+        $output->writeln("Found " . count($imageMarkersToRemove) . " image markers without a file, " . count($imageMarkersToKeep) . " are left untouched.");
+        if (count($imageMarkersToRemove) === count($values) && !$input->getOption('force')) {
+            $message = 'No file exists for any of the entries. This usually means the media files are missing rather than the entries being illegal.';
+            if ($isDryRun) {
+                $output->writeln('<comment>WARNING: ' . $message . ' A real run will abort unless you add --force.</comment>');
+                return Cli::RETURN_SUCCESS;
+            } else {
+                $output->writeln('<error>' . $message . ' Aborting. Add --force to remove them anyway.</error>');
+                return Cli::RETURN_FAILURE;
+            }
+        }
 
         if (!$isDryRun) {
             $coreWrite = $this->resource->getConnection('core_write');
@@ -114,8 +130,7 @@ Add the --dry-run option to just get the files that are unused.";
 
             $output->writeln("Entries where removed from products.");
         } else {
-            $output->writeln("The following items are save to be removed: " . print_r($imageMarkersToRemove,
-                    true));
+            $output->writeln("The entries listed above are safe to be removed.");
         }
 
         return Cli::RETURN_SUCCESS;

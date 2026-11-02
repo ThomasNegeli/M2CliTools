@@ -11,7 +11,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -28,17 +27,18 @@ class CleanupUnusedProductMedia extends Command
     private QuestionHelper $questionHelper;
 
     public function __construct(
-        Filesystem $filesystem,
+        Filesystem         $filesystem,
         ResourceConnection $resource,
-        QuestionHelper $questionHelper,
-    ) {
+        QuestionHelper     $questionHelper,
+    )
+    {
         $this->filesystem = $filesystem;
         $this->resource = $resource;
         $this->questionHelper = $questionHelper;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tnegeli:cleanup-unused-product-media')
             ->setDescription('Cleans up unused product media from the filesystem.')
@@ -52,7 +52,7 @@ Add the --delete option to delete the files, instead of doing a backup";
         $this->setHelp($help);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $isDryRun = $input->getOption('dry-run');
         if (!$isDryRun) {
@@ -75,13 +75,23 @@ Add the --delete option to delete the files, instead of doing a backup";
         }
 
         $values = $this->getDbValues();
-        echo "DB Values: " . print_r($values, true) . PHP_EOL;
+        $output->writeln('Found ' . count($values) . ' media entries in database.');
+        foreach ($values as $value) {
+            $output->writeln('DB value: ' . $value, OutputInterface::VERBOSITY_DEBUG);
+        }
+        $values = array_fill_keys($values, true);
 
         $filesize = 0;
         $countFiles = 0;
-        $table = [];
+        $countErrors = 0;
         $mediaDirectory = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA);
+        $mediaWriteDirectory = $this->filesystem->getDirectoryWrite(DirectoryList::MEDIA);
         $imageDir = rtrim($mediaDirectory->getAbsolutePath(), "/") . DIRECTORY_SEPARATOR . 'catalog' . DIRECTORY_SEPARATOR . 'product';
+        if (!is_dir($imageDir)) {
+            $output->writeln("The media directory " . $imageDir . " does not exist. Nothing to clean up.");
+            return Cli::RETURN_SUCCESS;
+        }
+
         $backupDir = $imageDir . DIRECTORY_SEPARATOR . 'unused_files_backup';
         $directoryIterator = new RecursiveDirectoryIterator($imageDir, FilesystemIterator::SKIP_DOTS);
         foreach (new RecursiveIteratorIterator($directoryIterator) as $file) {
@@ -101,38 +111,37 @@ Add the --delete option to delete the files, instead of doing a backup";
             if (empty($filePath)) {
                 continue;
             }
-            echo "Checking file for usage: " . $filePath . PHP_EOL;
-            if (!in_array($filePath, $values)) {
+            $output->writeln("Checking file for usage: " . $filePath, OutputInterface::VERBOSITY_VERY_VERBOSE);
+            if (!isset($values[$filePath])) {
                 $filesize += filesize($file);
                 $countFiles++;
                 if (!$isDryRun) {
-                    $table[] = [ '## REMOVING: ' . $filePath . ' ##' ];
-                    if ($isDelete) {
-                        unlink($file);
-                    } else {
-                        $newFile = str_replace($imageDir, $backupDir, $file);
-                        if (!file_exists(dirname($newFile))) {
-                            mkdir(dirname($newFile), 0777, true);
+                    $output->writeln('## REMOVING: ' . $filePath . ' ##');
+                    try {
+                        $relativeFile = $mediaWriteDirectory->getRelativePath((string)$file);
+                        if ($isDelete) {
+                            $mediaWriteDirectory->delete($relativeFile);
+                        } else {
+                            $relativeBackupFile = $mediaWriteDirectory->getRelativePath(str_replace($imageDir, $backupDir, (string)$file));
+                            $mediaWriteDirectory->renameFile($relativeFile, $relativeBackupFile);
                         }
-                        rename($file, $newFile) or die('Error on file backup from ' . $file . ' to ' . $newFile);
+                    } catch (\Throwable $e) {
+                        $output->writeln('<error>Error on removing ' . $file . ': ' . $e->getMessage() . '</error>');
+                        $countErrors++;
                     }
                 } else {
-                    $table[] = [ '## REMOVING: ' . $filePath . ' ## -- DRY RUN' ];
+                    $output->writeln('## REMOVING: ' . $filePath . ' ## -- DRY RUN');
                 }
             }
         }
 
-        $headers = [];
-        $headers[] = 'filepath';
-
-        $newtable = new Table($output);
-        $newtable->setHeaders($headers)
-            ->setRows($table)
-            ->render($output);
-
-        $output->writeln("Found " . number_format($filesize / 1024 / 1024, '2') . " MB unused images in " . $countFiles . " files");
+        $output->writeln("Found " . number_format($filesize / 1024 / 1024, 2) . " MB unused images in " . $countFiles . " files");
         if (!$isDelete && !$isDryRun) {
             $output->writeln("Files were moved to the following backup location: " . $backupDir);
+        }
+        if ($countErrors > 0) {
+            $output->writeln('<error>' . $countErrors . ' files could not be removed, see errors above.</error>');
+            return Cli::RETURN_FAILURE;
         }
 
         return Cli::RETURN_SUCCESS;

@@ -2,15 +2,14 @@
 
 namespace Tnegeli\M2CliTools\Console\Command;
 
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Console\Cli;
+use Magento\Framework\Filesystem;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Filesystem;
 
 
 /**
@@ -25,16 +24,17 @@ class CleanupIllegalProductMedia extends Command
     private QuestionHelper $questionHelper;
 
     public function __construct(
-        Filesystem $filesystem,
+        Filesystem         $filesystem,
         ResourceConnection $resource,
-        QuestionHelper $questionHelper,
-    ) {
+        QuestionHelper     $questionHelper,
+    )
+    {
         $this->resource = $resource;
         $this->questionHelper = $questionHelper;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tnegeli:cleanup-illegal-product-media')
             ->setDescription('Cleanup illegal product media from database, which might break your image cache regeneration process.')
@@ -47,7 +47,7 @@ Add the --dry-run option to just get the files that are unused.";
         $this->setHelp($help);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $isDryRun = $input->getOption('dry-run');
         if (!$isDryRun) {
@@ -64,8 +64,10 @@ Add the --dry-run option to just get the files that are unused.";
             $output->writeln('There are no illegal values in media gallery table.');
             return Cli::RETURN_SUCCESS;
         }
-        echo "The following entries in " . $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery') . " are illegal: " . print_r($values,
-                true) . PHP_EOL;
+        $output->writeln("Found " . count($values) . " illegal entries in " . $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery') . ":");
+        foreach ($values as $valueId) {
+            $output->writeln("Illegal value_id: " . $valueId);
+        }
 
         if (!$isDryRun) {
             $coreWrite = $this->resource->getConnection('core_write');

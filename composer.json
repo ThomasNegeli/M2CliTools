@@ -13,8 +13,11 @@
     "cli"
   ],
   "require": {
-    "php": ">=7.1",
-    "magento/framework": ">=100.1.5"
+    "php": "~8.2.0||~8.3.0||~8.4.0||~8.5.0",
+    "magento/framework": "^103.0.7",
+    "magento/module-catalog": "^104.0.7",
+    "magento/module-indexer": "^100.4.7",
+    "magento/module-swatches": "^100.4.7"
   },
   "autoload": {
     "psr-4": {

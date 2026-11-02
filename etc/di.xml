@@ -1,14 +1,27 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="clean_unused_product_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedProductMedia</item>
-                <item name="clean_unused_category_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedCategoryMedia</item>
-                <item name="clean_unused_swatches_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupUnusedSwatchesMedia</item>
-                <item name="clean_illegal_product_media" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductMedia</item>
-                <item name="clean_illegal_product_media_non_existing_files" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductMediaNonExistingFiles</item>
-                <item name="clean_illegal_product_image_markers_non_existing_files" xsi:type="object">Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductImageMarkersNonExistingFiles</item>
+                <item name="clean_unused_product_media" xsi:type="object">
+                    Tnegeli\M2CliTools\Console\Command\CleanupUnusedProductMedia
+                </item>
+                <item name="clean_unused_category_media" xsi:type="object">
+                    Tnegeli\M2CliTools\Console\Command\CleanupUnusedCategoryMedia
+                </item>
+                <item name="clean_unused_swatches_media" xsi:type="object">
+                    Tnegeli\M2CliTools\Console\Command\CleanupUnusedSwatchesMedia
+                </item>
+                <item name="clean_illegal_product_media" xsi:type="object">
+                    Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductMedia
+                </item>
+                <item name="clean_illegal_product_media_non_existing_files" xsi:type="object">
+                    Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductMediaNonExistingFiles
+                </item>
+                <item name="clean_illegal_product_image_markers_non_existing_files" xsi:type="object">
+                    Tnegeli\M2CliTools\Console\Command\CleanupIllegalProductImageMarkersNonExistingFiles
+                </item>
             </argument>
         </arguments>
     </type>
