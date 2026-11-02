@@ -148,17 +148,17 @@ Add the --dry-run option to just get the files that are unused.";
         $coreRead = $this->resource->getConnection('core_read');
 
         // get the internal id of the entity type product
-        $eavEntityType = $this->resource->getConnection()->getTableName('eav_entity_type');
+        $eavEntityType = $this->resource->getTableName('eav_entity_type');
         $select = 'SELECT entity_type_id FROM ' . $eavEntityType . ' WHERE entity_type_code = "catalog_product"';
         $entityTypeId = $coreRead->fetchOne($select);
 
         // get the relevant attribute ids
-        $eavAttribute = $this->resource->getConnection()->getTableName('eav_attribute');
+        $eavAttribute = $this->resource->getTableName('eav_attribute');
         $select = 'SELECT attribute_id FROM ' . $eavAttribute . ' WHERE entity_type_id = ' . $entityTypeId . ' AND attribute_code IN ("image","small_image","thumbnail")';
         $imageAttributeIds = $coreRead->fetchCol($select);
 
         // get the image marker values
-        $catalogProductEntityVarchar = $this->resource->getConnection()->getTableName('catalog_product_entity_varchar');
+        $catalogProductEntityVarchar = $this->resource->getTableName('catalog_product_entity_varchar');
         $select = 'SELECT value_id, value FROM ' . $catalogProductEntityVarchar .
             ' WHERE attribute_id IN ("' . implode('","', $imageAttributeIds) . '") AND value != "no_selection" AND value IS NOT NULL';
         return $select;
@@ -171,7 +171,7 @@ Add the --dry-run option to just get the files that are unused.";
 
     private function getImageMarkerDelete($valueIds)
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_varchar');
+        $mediaGallery = $this->resource->getTableName('catalog_product_entity_varchar');
         $valueIds = implode(',', $valueIds);
         $delete = 'DELETE FROM ' . $mediaGallery . ' WHERE value_id IN (' . $valueIds . ')';
         return $delete;

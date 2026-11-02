@@ -149,7 +149,7 @@ Add the --delete option to delete the files, instead of doing a backup";
 
     private function getDbValues()
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery');
+        $mediaGallery = $this->resource->getTableName('catalog_product_entity_media_gallery');
         $coreRead = $this->resource->getConnection('core_read');
         $values = $coreRead->fetchCol('SELECT value FROM ' . $mediaGallery);
         return $values;

@@ -129,14 +129,14 @@ Add the --dry-run option to just get the files that are unused.";
 
     private function getSelect()
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery');
+        $mediaGallery = $this->resource->getTableName('catalog_product_entity_media_gallery');
         $select = 'SELECT value_id, value FROM ' . $mediaGallery;
         return $select;
     }
 
     private function getMediaGalleryDelete($valueIds)
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery');
+        $mediaGallery = $this->resource->getTableName('catalog_product_entity_media_gallery');
         $valueIds = implode(',', $valueIds);
         $delete = 'DELETE FROM ' . $mediaGallery . ' WHERE value_id IN (' . $valueIds . ')';
         return $delete;
@@ -144,7 +144,7 @@ Add the --dry-run option to just get the files that are unused.";
 
     private function getMediaGalleryValueDelete($valueIds)
     {
-        $mediaGalleryValue = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery_value');
+        $mediaGalleryValue = $this->resource->getTableName('catalog_product_entity_media_gallery_value');
         $valueIds = implode(',', $valueIds);
         $delete = 'DELETE FROM ' . $mediaGalleryValue . ' WHERE value_id IN (' . $valueIds . ')';
         return $delete;
@@ -152,7 +152,7 @@ Add the --dry-run option to just get the files that are unused.";
 
     private function getMediaGalleryValueToEntityDelete($valueIds)
     {
-        $mediaGalleryValueToEntity = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery_value_to_entity');
+        $mediaGalleryValueToEntity = $this->resource->getTableName('catalog_product_entity_media_gallery_value_to_entity');
         $valueIds = implode(',', $valueIds);
         $delete = 'DELETE FROM ' . $mediaGalleryValueToEntity . ' WHERE value_id IN (' . $valueIds . ')';
         return $delete;

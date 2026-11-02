@@ -149,12 +149,12 @@ Add the --delete option to delete the files, instead of doing a backup";
 
     private function getDbValues()
     {
-        $eavAttributeTable = $this->resource->getConnection()->getTableName('eav_attribute');
-        $eavEntityTypeTable = $this->resource->getConnection()->getTableName('eav_entity_type');
+        $eavAttributeTable = $this->resource->getTableName('eav_attribute');
+        $eavEntityTypeTable = $this->resource->getTableName('eav_entity_type');
         $coreRead = $this->resource->getConnection('core_read');
         $entityTypeId = $coreRead->fetchOne('SELECT entity_type_id FROM ' . $eavEntityTypeTable . ' WHERE entity_type_code = "catalog_category"');
         $attributeId = $coreRead->fetchOne('SELECT attribute_id FROM ' . $eavAttributeTable . ' WHERE entity_type_id = "' . $entityTypeId . '" AND attribute_code = "image"');
-        $categoryVarcharTable = $this->resource->getConnection()->getTableName('catalog_category_entity_varchar');
+        $categoryVarcharTable = $this->resource->getTableName('catalog_category_entity_varchar');
         $values = $coreRead->fetchCol('SELECT value FROM ' . $categoryVarcharTable . ' WHERE attribute_id = ' . $attributeId . ' AND value IS NOT NULL');
 
         // newer Magento versions store the path relative to the base url, e.g. /media/catalog/category/image.jpg

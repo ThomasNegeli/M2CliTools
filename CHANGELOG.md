@@ -15,6 +15,7 @@
 ### Added
 
 * `--force` option for the commands listed above.
+* Support for table prefixes.
 
 ### Fixed
 

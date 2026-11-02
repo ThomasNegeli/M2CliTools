@@ -208,7 +208,7 @@ Add the --delete option to delete the files, instead of doing a backup";
 
     private function getDbValues()
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('eav_attribute_option_swatch');
+        $mediaGallery = $this->resource->getTableName('eav_attribute_option_swatch');
         $coreRead = $this->resource->getConnection('core_read');
         $values = $coreRead->fetchCol('SELECT value FROM ' . $mediaGallery . ' WHERE value IS NOT NULL AND value NOT LIKE "#%"');
         return $values;

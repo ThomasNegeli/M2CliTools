@@ -64,7 +64,7 @@ Add the --dry-run option to just get the files that are unused.";
             $output->writeln('There are no illegal values in media gallery table.');
             return Cli::RETURN_SUCCESS;
         }
-        $output->writeln("Found " . count($values) . " illegal entries in " . $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery') . ":");
+        $output->writeln("Found " . count($values) . " illegal entries in " . $this->resource->getTableName('catalog_product_entity_media_gallery') . ":");
         foreach ($values as $valueId) {
             $output->writeln("Illegal value_id: " . $valueId);
         }
@@ -88,16 +88,16 @@ Add the --dry-run option to just get the files that are unused.";
 
     private function getSelect()
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery');
-        $mediaGalleryValueToEntity = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery_value_to_entity');
+        $mediaGallery = $this->resource->getTableName('catalog_product_entity_media_gallery');
+        $mediaGalleryValueToEntity = $this->resource->getTableName('catalog_product_entity_media_gallery_value_to_entity');
         $select = 'SELECT value_id FROM ' . $mediaGallery . ' WHERE value_id NOT IN (SELECT value_id FROM ' . $mediaGalleryValueToEntity . ')';
         return $select;
     }
 
     private function getDelete()
     {
-        $mediaGallery = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery');
-        $mediaGalleryValueToEntity = $this->resource->getConnection()->getTableName('catalog_product_entity_media_gallery_value_to_entity');
+        $mediaGallery = $this->resource->getTableName('catalog_product_entity_media_gallery');
+        $mediaGalleryValueToEntity = $this->resource->getTableName('catalog_product_entity_media_gallery_value_to_entity');
         $delete = 'DELETE FROM ' . $mediaGallery . ' WHERE value_id NOT IN (SELECT value_id FROM ' . $mediaGalleryValueToEntity . ')';
         return $delete;
     }
