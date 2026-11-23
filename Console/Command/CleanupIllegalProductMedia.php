@@ -4,7 +4,6 @@ namespace Tnegeli\M2CliTools\Console\Command;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Console\Cli;
-use Magento\Framework\Filesystem;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +23,6 @@ class CleanupIllegalProductMedia extends Command
     private QuestionHelper $questionHelper;
 
     public function __construct(
-        Filesystem         $filesystem,
         ResourceConnection $resource,
         QuestionHelper     $questionHelper,
     )
